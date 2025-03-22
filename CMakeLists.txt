@@ -1,9 +1,9 @@
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.10)
 set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-set(PETSC_DIR "/home/nero/petsc" CACHE PATH "Path to SLEPc")
-set(PETSC_ARCH "linux-gnu" CACHE STRING "PETSc architecture")
-set(SLEPC_DIR "/home/nero/slepc" CACHE PATH "Path to SLEPc")
+set(PETSC_DIR "/home/huangkai/petsc" CACHE PATH "Path to SLEPc")
+set(PETSC_ARCH "arch-linux-c-debug" CACHE STRING "PETSc architecture")
+set(SLEPC_DIR "/home/huangkai/slepc" CACHE PATH "Path to SLEPc")
 set(MPI_DIR "/opt/intel/oneapi/mpi/latest" CACHE PATH "Path to MPI")
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
@@ -23,11 +23,27 @@ include (GenerateExportHeader)
 include (ProcessorCount)
 include (GenerateVersion)
 
-project (PMTop CXX C)
+project (TPTD CXX C)
 
 
 string(TIMESTAMP YEAR "%Y")
 set (oofem_COPYRIGHT "Copyright (C) 1994-${YEAR} Huang Kai")
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(MKL_LINK dynamic)
+set(MKL_THREADING intel_thread)
+set(MKL_INTERFACE lp64)
+set(MKL_MPI intelmpi)
+
+find_package(MKL REQUIRED)
+
+if (MKL_FOUND)
+    add_definitions(-D__MKL_MODULE)
+endif()
+
+
 
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -120,7 +136,7 @@ if (USE_MPI)
     # Compile and link flags?
 endif ()
 
-add_executable(PMTop main.cpp)
+add_executable(TPTD main.cpp)
 
 
-target_link_libraries (PMTop ${EXT_LIBS})
+target_link_libraries (TPTD ${EXT_LIBS})
