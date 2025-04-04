@@ -4,7 +4,10 @@
  * File         : MultipleShooting.cpp
  * Author       : Nero <Huangkai23@mails.jlu.edu.cn>
  * Created      : 2025-04-04
- * Description  : Use MultipleShooting method to calculate time parallelism.
+ * Description  :  N equidistant coarse time points doing K iterations. It uses a
+ * propagator P(t0,t1,ut0) that returns the solution and the Jacobian
+ * at time t1, and an initial guess uPred containing N+1 starting
+ * values for the algorithm.
  *
  * Copyright (c) 2025 Nero
  *
@@ -149,7 +152,7 @@ void ForwardEulerJac(double TL, double TR, double *u0, int n, int N,
   mkl_free(t);
 }
 
-int CForwardEuler(double TL, double TR, double *u0, int s, int n, double *uPred,
+int CForwardEuler(double TL, double TR, double *u0, int s, int n,
                   double *u1, double *V) {
 
   double *u0All = (double *)mkl_calloc(s * (s + 1), sizeof(double), 64);
@@ -201,7 +204,7 @@ void MultipleShooting(double TL, double TR, double *u0, int N, int K, int M,
       }
       double u1[3];
       double V1[9];
-      CForwardEuler(TT[i], TT[i + 1], uu0, 3, M, U, u1, V1);
+      CForwardEuler(TT[i], TT[i + 1], uu0, 3, M, u1, V1);
       cblas_dcopy(3,u1,1,u+3*i,1);
       cblas_dcopy(9,V1,1,V+9*i,1);
     });
@@ -242,7 +245,7 @@ int main() {
   double u0[3] = {20, 5, -5};
   int K = 9;
   int N = 500;
-  double *uPred = new double[(N + 1) * 3];
+  double *uPred = (double *)mkl_malloc((N + 1) * 3 * sizeof(double), 64);
   ForwardEuler(0, T, u0, 3, N, uPred);
 
   double *RES = (double *)mkl_malloc((N + 1) * 3 * sizeof(double), 64);
@@ -250,6 +253,7 @@ int main() {
   MultipleShooting(0, T, u0, N, K, M, uPred, RES);
 
   mkl_free(RES);
+  mkl_free(uPred);
 
   return 0;
 }
