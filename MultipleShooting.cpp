@@ -2,7 +2,7 @@
 * ----------------------------------------------------------------------------
  * Project Name : MultipleShooting
  * File         : MultipleShooting.cpp
- * Author       : Nero <Huangkai23@mails.jlu.edu.cn>
+ * Author       : Nero <huangkai23@mails.jlu.edu.cn>
  * Created      : 2025-04-04
  * Description  :  N equidistant coarse time points doing K iterations. It uses a
  * propagator P(t0,t1,ut0) that returns the solution and the Jacobian

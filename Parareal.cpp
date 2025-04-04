@@ -2,7 +2,7 @@
 * ----------------------------------------------------------------------------
  * Project Name : Parareal
  * File         : Parareal.cpp
- * Author       : Nero <Huangkai23@mails.jlu.edu.cn>
+ * Author       : Nero <huangkai23@mails.jlu.edu.cn>
  * Created      : 2025-04-04
  * Description  :   PARAREAL implementation of the parareal algorithm
  * U=Parareal(F,G,T,u0,N,K); applies the parareal algorithm with fine
