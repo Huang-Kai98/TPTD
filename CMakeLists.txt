@@ -1,8 +1,8 @@
-cmake_minimum_required (VERSION 3.20)
+cmake_minimum_required (VERSION 3.1)
 set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set(PETSC_DIR "/home/nero/petsc" CACHE PATH "Path to SLEPc")
-set(PETSC_ARCH "linux-gnu" CACHE STRING "PETSc architecture")
+set(PETSC_ARCH "arch-linux-c-debug" CACHE STRING "PETSc architecture")
 set(SLEPC_DIR "/home/nero/slepc" CACHE PATH "Path to SLEPc")
 set(MPI_DIR "/opt/intel/oneapi/mpi/latest" CACHE PATH "Path to MPI")
 set(CMAKE_EXPORT_COMPILE_COMMANDS True)

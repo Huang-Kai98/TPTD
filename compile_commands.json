@@ -1,7 +1,7 @@
 [
 {
-  "directory": "/home/nero/test/build",
-  "command": "/opt/intel/oneapi/mpi/2021.14/bin/mpicxx -D__PETSC_MODULE -D__SLEPC_MODULE -I/home/nero/test/build -I/home/nero/petsc/linux-gnu/include -I/home/nero/petsc/include -I/home/nero/slepc/include -I/home/nero/slepc/linux-gnu/include -I/opt/intel/oneapi/mpi/latest/include -g -o CMakeFiles/PMTop.dir/main.cpp.o -c /home/nero/test/main.cpp",
-  "file": "/home/nero/test/main.cpp"
+  "directory": "/home/nero/TPTD/build",
+  "command": "/usr/bin/mpicxx -D__MKL_MODULE -D__PETSC_MODULE -D__SLEPC_MODULE -I/home/nero/TPTD/build -I/home/nero/petsc/include -I/home/nero/petsc/linux-gnu/include -I/home/nero/slepc/include -I/home/nero/slepc/linux-gnu/include -I/opt/intel/oneapi/mpi/latest/include -g -o CMakeFiles/TPTD.dir/main.cpp.o -c /home/nero/TPTD/main.cpp",
+  "file": "/home/nero/TPTD/main.cpp"
 }
 ]
