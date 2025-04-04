@@ -1,3 +1,34 @@
+/*
+* ----------------------------------------------------------------------------
+ * Project Name : MultipleShooting
+ * File         : MultipleShooting.cpp
+ * Author       : Nero <Huangkai23@mails.jlu.edu.cn>
+ * Created      : 2025-04-04
+ * Description  : Use MultipleShooting method to calculate time parallelism.
+ *
+ * Copyright (c) 2025 Nero
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ * ----------------------------------------------------------------------------
+ */
+
+
 #include <iostream>
 #include <mkl.h>
 #include <mkl_service.h>
@@ -87,22 +118,18 @@ void ForwardEulerJac(double TL, double TR, double *u0, int n, int N,
     jac(t[i - 1], ut, J1);
     for (int j = n; j < n * (n + 1); j++) {
       J2[j - n] = u[j * (N + 1) + i - 1];
-      // std::cout << u[j * (N + 1) + i - 1] << std::endl;
     }
 
     for (int ii = 0; ii < n; ii++) {
       for (int jj = 0; jj < n; jj++) {
         for (int kk = 0; kk < n; kk++) {
           J[ii + jj * n] += J1[ii + kk * n] * J2[kk + jj * n];
-          // std::cout << J2[ii + jj * n] << std::endl;
-          //     J[ii * n + jj] += J1[ii * n + kk] * J2[kk * n + jj];
         }
       }
     }
 
     for (int j = 0; j < n; j++) {
       JR[j] = Res[j];
-      // std::cout << JR[j] << std::endl;
     }
     for (int j = n; j < n * (n + 1); j++) {
       JR[j] = J[j - n];
@@ -162,20 +189,48 @@ void MultipleShooting(double TL, double TR, double *u0, int N, int K, int M,
   }
   cblas_dcopy(3 * (N + 1), uPred, 1, U, 1);
   double *Unew = (double *)mkl_malloc(3 * (N + 1) * sizeof(double), 64);
+  double *u=(double *)mkl_malloc(3 * N  * sizeof(double), 64);
+  double *V=(double *)mkl_malloc(9 * N * sizeof(double), 64);
 
-  tbb::parallel_for(0, N, [&uPred, &N, &M, &TT](int i) {
-    double uu0[3];
+  for (int k=0;k<K;k++) {
+
+    tbb::parallel_for(0, N, [&U,&u,&V, &N, &M, &TT](int i) {
+      double uu0[3];
+      for (int ii = 0; ii < 3; ii++) {
+        uu0[ii] = U[ii * (N + 1) + i];
+      }
+      double u1[3];
+      double V1[9];
+      CForwardEuler(TT[i], TT[i + 1], uu0, 3, M, U, u1, V1);
+      cblas_dcopy(3,u1,1,u+3*i,1);
+      cblas_dcopy(9,V1,1,V+9*i,1);
+    });
+
     for (int ii = 0; ii < 3; ii++) {
-      uu0[ii] = uPred[ii * (N + 1) + i];
+      Unew[ii * (N + 1)] = u0[ii];
     }
-    double u1[3];
-    double V[9];
-    CForwardEuler(TT[i], TT[i + 1], uu0, 3, M, uPred, u1, V);
-    std::cout << std::this_thread::get_id() << " ";
-    std::cout << "u1: " << u1[0] << " " << u1[1] << " " << u1[2] << " ";
-    std::cout << std::endl;
-  });
+    for (int n=0;n<N;n++) {
+      double temp[3],temp1[3];
+      for (int ii = 0; ii < 3; ii++) {
+        temp[ii] = Unew[ii * (N + 1) + n]-U[ii * (N + 1) + n];
+      }
 
+      cblas_dgemv(CblasColMajor,CblasNoTrans,3,3,1.0,V+9*n,3,temp,1,0.0,temp1,1);
+
+      cblas_daxpy(3,1.0,u+3*n,1,temp1,1);
+      for (int ii = 0; ii < 3; ii++) {
+        Unew[ii * (N + 1)+n+1] = temp1[ii];
+      }
+    }
+    cblas_dcopy((N+1)*3,Unew,1,U,1);
+  }
+
+  for (int i=0;i<N+1;i++) {
+    std::cout<<U[0 * (N + 1)+i]<<" "<< U[1 * (N + 1)+i]<<" "<< U[2 * (N + 1)+i]<<std::endl;
+  }
+
+  mkl_free(V);
+  mkl_free(u);
   mkl_free(Unew);
 
   mkl_free(TT);
